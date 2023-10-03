@@ -1,0 +1,5 @@
+/node_modules
+/tareas.txt
+/.env.development.local
+/.env.qa.local
+/.env.production.local
