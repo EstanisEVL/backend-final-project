@@ -1,5 +1,7 @@
 /node_modules
-/tareas.txt
+/ideas y tareas.txt
+/requerimientos.txt
+/testing.txt
 /.env.development.local
 /.env.qa.local
 /.env.production.local
