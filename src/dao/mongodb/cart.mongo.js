@@ -31,34 +31,7 @@ export default class Carts {
     }
   };
 
-  updateById = async (cid, cartBody) => {
-    try {
-      const updatedCart = await cartModel.findOneAndUpdate(
-        { _id: cid },
-        { $set: cartBody }
-      );
-      return updatedCart;
-    } catch (err) {
-      return err;
-    }
-  };
-
-  // REVISAR CON CORRECCIONES
-  getAndUpdateById = async (cid, pid, updatedProductBody) => {
-    try {
-      // const cart = getByIdAndUpdate(cid, pid, {
-      //   category: updatedProductBody.category,
-      // });
-
-      const cart = await cartModel.findById({ _id: cid });
-      // const product = cart.products.find()
-      return cart;
-    } catch (err) {
-      return err;
-    }
-  };
-
-  deleteById = async (cid) => {
+  delete = async (cid) => {
     try {
       const cart = await cartModel.deleteOne({ _id: cid });
       return cart;

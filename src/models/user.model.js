@@ -29,7 +29,7 @@ const schema = new mongoose.Schema({
   },
   role: { type: String, enum: Object.values(roleType), default: roleType.user },
   documents: [{ name: String, reference: String, docType: String }],
-  last_connection: String,
+  last_connection: Date,
 });
 
 schema.plugin(mongoosePaginate);

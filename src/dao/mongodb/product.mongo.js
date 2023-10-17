@@ -28,18 +28,18 @@ export default class Products {
     }
   };
 
-  create = async (pBody) => {
+  create = async (productBody) => {
     try {
-      const product = await productModel.create(pBody);
+      const product = await productModel.create(productBody);
       return product;
     } catch (err) {
       return err;
     }
   };
 
-  update = async (pid, pBody) => {
+  update = async (pid, productBody) => {
     try {
-      const product = await productModel.findByIdAndUpdate(pid, pBody, {new: true});
+      const product = await productModel.findByIdAndUpdate(pid, productBody, {new: true});
       return product;
     } catch (err) {
       return err;

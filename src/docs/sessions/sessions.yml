@@ -1,0 +1,498 @@
+# CON SWAGGER SÓLO DOCUMENTAR LOS ENDPOINTS QUE DEVUELVEN UN JSON, Para los que entregan vistas o redirigen, describir el funcionamiento del endpoint en cada respuesta.
+paths:
+  /api/v1/sessions/register:
+    post:
+      summary: Registers a new user in the data base.
+      tags:
+        - Sessions
+      requestBody:
+        description: Registers a new user in the data base.
+        content:
+          application/json:
+            schema:
+              $ref: "#components/requestBodies/registerUser"
+      responses:
+        "200":
+          description: Ok. Redirects to /login.
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_user_exists:
+                    type: string
+                    description: User already exists.
+                  error_invalid_fields:
+                    type: string
+                    description: Invalid or missing fields.
+                  error_invalid_name:
+                    type: string
+                    description: Invalid input first or last name.
+                  error_invalid_email:
+                    type: string
+                    description: Invalid email.
+                  error_invalid_age:
+                    type: string
+                    description: Invalid age.
+                  error_invalid_password_length:
+                    type: string
+                    description: Invalid password length.
+                  error_password_format_example:
+                    type: string
+                    description: Invalid password format.
+              examples:
+                user_exists_example:
+                  summary: User already exists.
+                  value:
+                    message: Error - User already exists.
+                invalid_fields_example:
+                  summary: Invalid or missing fields.
+                  value:
+                    message: Error - Invalid or missing fields.
+                invalid_first_name_example:
+                  summary: Invalid name.
+                  value:
+                    message: Error - <input> is not a valid name, it must contain only letters and its length must be between 4 and 20 characters.
+                invalid_email_example:
+                  summary: Invalid email.
+                  value:
+                    message: Error - Please enter a valid email address.
+                invalid_age_example:
+                  summary: Invalid age.
+                  value:
+                    message: Error - Please enter a valid age.
+                invalid_password_length_example:
+                  summary: Invalid password length.
+                  value:
+                    message: Error - Password must be at least 8 characters long.
+                invalid_password_format_example:
+                  summary: Invalid password format.
+                  value:
+                    message: Error - Password must have at least one lowercase letter, one uppercase letter, one number and one special character (@$!%*?&).
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/SessionServerError/registerUser"
+  /api/v1/sessions/login:
+    post:
+      summary: Log in with admin or user credentials.
+      tags:
+        - Sessions
+      requestBody:
+        description: Logs in with user credentials.
+        content:
+          application/json:
+            schema:
+              $ref: "#components/requestBodies/userLogin"
+      responses:
+        "200":
+          description: Ok. Renders profile page.
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_invalid_fields:
+                    type: string
+                    description: Invalid or missing fields.
+              example:
+                message: Error - Please fill all required fields.
+        "401":
+          description: Unauthorized. Redirects to /register
+        "404":
+          description: Not found. Redirects to /register
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/SessionServerError/userLogin"
+  /api/v1/sessions/recover:
+    post:
+      summary: Sends an email to the user to start the password recovery process.
+      tags:
+        - Sessions
+      requestBody:
+        description: Enter an existing user's email address.
+        content:
+          application/json:
+            schema:
+              $ref: "#components/requestBodies/recoverPassword"
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#components/schemas/RecoverPassword"
+        "404":
+          description: Not found. Redirects to /register.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/SessionServerError/recoverPassword"
+  /api/v1/sessions/reset:
+    post:
+      summary: Changes password in data base to a new one provided by the user.
+      tags:
+        - Sessions
+      requestBody:
+        description: Enter user's email and new password.
+        content:
+          application/json:
+            schema:
+              $ref: "#components/requestBodies/resetPassword"
+      responses:
+        "200":
+          description: Ok. Redirects to /login.
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_same_password:
+                    type: string
+                    description: Same password as the one trying to change.
+                  error_invalid_fields:
+                    type: string
+                    description: Invalid or missing fields.
+                  error_invalid_email:
+                    type: string
+                    description: Invalid email.
+                  error_invalid_password_length:
+                    type: string
+                    description: Invalid password length.
+                  error_password_format_example:
+                    type: string
+                    description: Invalid password format.
+              examples:
+                same_password_example:
+                  summary: Same password as the existing one.
+                  value:
+                    message: Error - Password cannot be the same as the existing one.
+                invalid_fields_example:
+                  summary: Invalid or missing fields.
+                  value:
+                    message: Error - Please fill all required fields.
+                invalid_email_example:
+                  summary: Invalid email.
+                  value:
+                    message: Error - Please enter a valid email address.
+                invalid_password_length_example:
+                  summary: Invalid password length.
+                  value:
+                    message: Error - Password must be at least 8 characters long.
+                invalid_password_format_example:
+                  summary: Invalid password format.
+                  value:
+                    message: Error - Password must have at least one lowercase letter, one uppercase letter, one number and one special character (@$!%*?&).
+        "404":
+          description: Not found. Redirects to /register.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/SessionServerError/resetPassword"
+  /api/v1/sessions/logout:
+    get:
+      summary: Logs user or admin off.
+      tags:
+        - Sessions
+      responses:
+        "200":
+          description: Ok. Redirects to /login.
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_no_auth_token:
+                    type: string
+                    description: No auth token.
+              example:
+                error: Error - No auth token.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/SessionServerError/userLogout"
+  /api/v1/sessions/current:
+    get:
+      summary: Gets current user session.
+      tags:
+        - Sessions
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#components/schemas/Auth"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_no_auth_token:
+                    type: string
+                    description: No auth token.
+              example:
+                message: Access denied - invalid or expired token.
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_access_denied:
+                    type: string
+                    description: No auth token.
+              example:
+                message: Access denied - Unauthorized role.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/SessionServerError/currentUser"
+  /api/v1/sessions/github:
+    get:
+      summary: Redirects user to GitHub callback url.
+      tags:
+        - Sessions
+      responses:
+        "302":
+          description: Found. Temporary redirection to GitHub service.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/SessionServerError/githubLogin"
+  /api/v1/sessions/githubcallback:
+    get:
+      summary: Authenticates a user with its GitHub credentials.
+      tags:
+        - Sessions
+      responses:
+        "200":
+          description: Ok. Redirects to /profile?user=user.email
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/SessionServerError/getGithubUser"
+
+components:
+  schemas:
+    User:
+      type: object
+      description: Registered user object schema.
+      properties:
+        _id:
+          type: ObjectId
+          description: Id generated by mongo.
+        name:
+          type: string
+          description: User's first name and last name.
+        email:
+          type: string
+          description: User's email address.
+        userCarts:
+          description: User's cart.
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: ObjectId
+                description: Id generated by mongo.
+              products:
+                type: array
+                description: Array of existing products in cart.
+                items:
+                  type: object
+        role:
+          type: string
+          description: User's role.
+      example:
+        message: New user successfully registered.
+        user:
+          _id: 651c93389a348738a43a73b6
+          name: Prueba Nuevo
+          email: prueba@hotmail.com
+          userCarts: [{ _id: 64dcd2cbf32653bce70070bf, products: [] }]
+          role: USER
+    RecoverPassword:
+      type: object
+      description: Successfully sent recovery email object schema.
+      properties:
+        message:
+          type: string
+          description: Email successfully sent to email. Please check your inbox to continue the recovery process.
+      example:
+        message: Email successfully sent to <email>. Please check your inbox to continue the recovery process.
+    Auth:
+      type: object
+      description: Current session schema.
+      properties:
+        email:
+          type: string
+          description: Current user's email address.
+        role:
+          type: string
+          description: Current user's role.
+      example:
+        auth: { email: jperez@gmail.com, role: USER }
+    GitHubUser:
+      type: object
+      description: GitHub user schema.
+  SessionErrors:
+    registerUser:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Error code 400.
+        message:
+          type: string
+          description: User already exists in the data base.
+      example:
+        message: Error - user already exists.
+  SessionServerError:
+    registerUser:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error.
+      example:
+        status: 500
+        message: Server side error - in registerUser - session.controller.js.
+    userLogin:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error.
+      example:
+        status: 500
+        message: Server side error - in userLogin - session.controller.js
+    recoverPassword:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error.
+      example:
+        status: 500
+        message: Server side error - in recoverPassword - session.controller.js
+    resetPassword:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error.
+      example:
+        status: 500
+        message: Server side error - in resetPassword - session.controller.js
+    userLogout:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error.
+      example:
+        status: 500
+        message: Server side error - in userLogout - session.controller.js
+    currentUser:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error.
+      example:
+        status: 500
+        message: Server side error - in getCurrentUser - session.controller.js
+    githubLogin:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error.
+      example:
+        status: 500
+        message: Server side error - in githubLogin - session.controller.js
+    getGithubUser:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error.
+      example:
+        status: 500
+        message: Server side error - in getGithubUser - session.controller.js
+  requestBodies:
+    registerUser:
+      type: object
+      example:
+        {
+          first_name: Nuevo,
+          last_name: Usuario,
+          email: prueba2@hotmail.com,
+          age: 25,
+          password: 123456aA$,
+        }
+    userLogin:
+      type: object
+      example: { email: prueba@hotmail.com, password: 123456aA$ }
+    recoverPassword:
+      type: object
+      example: { email: prueba@hotmail.com }
+    resetPassword:
+      type: object
+      example: { email: jperez@gmail.com, password: 1234567aA$ }

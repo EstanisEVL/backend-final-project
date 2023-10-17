@@ -1,0 +1,611 @@
+paths:
+  /api/products:
+    get:
+      summary: Returns all existing products in data base.
+      tags:
+        - Products
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  products:
+                    type: array
+                    items:
+                      $ref: "#components/schemas/Product"
+                example:
+                  message: Products -
+                  products:
+                    [
+                      {
+                        owner: admin,
+                        _id: 64d64e95f0a8421ee857819d,
+                        title: Producto 1 actualizado,
+                        description: Producto de prueba,
+                        code: 234,
+                        price: 500,
+                        status: disponible,
+                        stock: 38,
+                        category: más pruebas,
+                        __v: 0,
+                      },
+                      {
+                        owner: admin,
+                        _id: 64dbafcd2052584634915ab3,
+                        title: Producto 2,
+                        description: Otro producto de prueba,
+                        code: 123,
+                        price: 300,
+                        status: disponible,
+                        stock: 73,
+                        category: más pruebas,
+                        __v: 0,
+                      },
+                    ]
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/ProductServerError/getProducts"
+    post:
+      summary: Creates a product.
+      tags:
+        - Products
+      requestBody:
+        description: Create a product in the data base.
+        content:
+          application/json:
+            schema:
+              $ref: "#components/requestBodies/createProduct"
+      responses:
+        "201":
+          description: Created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  productBody:
+                    type: object
+                    $ref: "#components/schemas/Product"
+                example:
+                  message: Product created -
+                  productBody:
+                    {
+                      title: Collar para perros M,
+                      description: Collar elastizado para perros talle medium.,
+                      code: 445566,
+                      price: 3000,
+                      status: disponible,
+                      stock: 76,
+                      category: Collares,
+                      owner: admin,
+                      _id: 64dbafcd2052584634915ab3,
+                    }
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Error - Product already exists. Please update product if you want to modify its values.
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_no_auth_token:
+                    type: string
+                    description: No auth token.
+              example:
+                message: Access denied - invalid or expired token.
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_access_denied:
+                    type: string
+                    description: No auth token.
+              example:
+                message: Access denied - Unauthorized role.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/ProductServerError/createProduct"
+  /api/products/{pid}:
+    get:
+      summary: Returns a product by id.
+      tags:
+        - Products
+      parameters:
+        - name: pid
+          in: path
+          required: true
+          description: Product id.
+          schema:
+            $type: ObjectId
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  product:
+                    type: object
+                    $ref: "#components/schemas/Product"
+                example:
+                  message: Product found -
+                  product:
+                    {
+                      owner: admin,
+                      _id: 64dbafcd2052584634915ab3,
+                      title: Collar para perros M,
+                      description: Collar elastizado para perros talle medium.,
+                      code: 445566,
+                      price: 3000,
+                      status: disponible,
+                      stock: 76,
+                      category: Collares,
+                    }
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Error - id is not a valid Mongo Id.
+        "404":
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Error - Product not found.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/ProductServerError/getProductById"
+    put:
+      summary: Updates a product by id.
+      tags:
+        - Products
+      parameters:
+        - name: pid
+          in: path
+          required: true
+          description: Product id.
+          schema:
+            $type: ObjectId
+      requestBody:
+        description: Create a product in the data base.
+        content:
+          application/json:
+            schema:
+              $ref: "#components/requestBodies/updateProduct"
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  updatedProduct:
+                    type: object
+                    $ref: "#components/schemas/Product"
+                example:
+                  message: Product Updated -
+                  updatedProduct:
+                    {
+                      owner: admin,
+                      _id: 64dbafcd2052584634915ab3,
+                      title: Collar para perros M,
+                      description: Collar elastizado para perros talle medium.,
+                      code: 445566,
+                      price: 3000,
+                      status: disponible,
+                      stock: 76,
+                      category: Collares,
+                    }
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_invalid_mongoid:
+                    type: string
+                    description: Id in params is not a valid mongo Id.
+                  error_invalid_fields:
+                    type: string
+                    description: Invalid product fields in body request.
+                  error_invalid_type_number:
+                    type: string
+                    description: Product field value must be a number.
+                  error_invalid_type_value:
+                    type: string
+                    description: Product field value must be a positive number greater than zero.
+                  error_invalid_type_string:
+                    type: string
+                    description: Product field value must be a string.
+              examples:
+                invalid_mongoid_example:
+                  summary: Invalid mongo Id.
+                  value:
+                    message: Error - id is not a valid Mongo Id.
+                invalid_fields_example:
+                  summary: Invalid fields.
+                  value:
+                    message: Error - only title, description, code, price, status, stock and/or category can be modified.
+                invalid_fields_type_number_example:
+                  summary: Product field value must be a number.
+                  value:
+                    message: Error - field.value must be a number.
+                invalid_fields_type_value_example:
+                  summary: Product field value must be a positive number greater than zero.
+                  value:
+                    message: Error - field.value must be a positive number greater than zero.
+                invalid_fields_type_string_example:
+                  summary: Product field value must be a string.
+                  value:
+                    message: Error - field.value must be a string.
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_no_auth_token:
+                    type: string
+                    description: No auth token.
+              example:
+                message: Access denied - invalid or expired token.
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_access_denied:
+                    type: string
+                    description: No auth token.
+              example:
+                message: Access denied - Unauthorized role.
+        "404":
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Error - Product not found.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/ProductServerError/updateProductById"
+    delete:
+      summary: Deletes a product by id.
+      tags:
+        - Products
+      parameters:
+        - name: pid
+          in: path
+          required: true
+          description: Product id.
+          schema:
+            $type: ObjectId
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  deletedProduct:
+                    type: object
+                    $ref: "#components/schemas/DeletedProduct"
+                example:
+                  message: Product deleted - 
+                  deletedProduct: { acknowledged: true, deletedCount: 1 }
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Error - id is not a valid Mongo Id.
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_no_auth_token:
+                    type: string
+                    description: No auth token.
+              example:
+                message: Access denied - invalid or expired token.
+        "403":
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_access_denied:
+                    type: string
+                    description: No auth token.
+                  error_premium_access:
+                    type: string
+                    description: Premium users cannot delete admin's products.
+              examples:
+                access_denied_example:
+                  summary: No auth token.
+                  value:
+                    message: Access denied - Unauthorized role.
+                premium_access_example:
+                  summary: Premium users cannot delete admin's products.
+                  value:
+                    message: Error - Premium users cannot delete products created by the admin.
+        "404":
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Error - Product not found.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/ProductServerError/deleteProductById"
+
+components:
+  schemas:
+    Product:
+      type: object
+      description: Product schema.
+      properties:
+        _id:
+          type: ObjectId
+          description: Id generated by mongo.
+        title:
+          type: string
+          description: Product title.
+        description:
+          type: string
+          description: Product description.
+        code:
+          type: integer
+          description: Product code.
+        price:
+          type: integer
+          description: Product price.
+        status:
+          type: string
+          description: Product status.
+          enum: ["no disponible", "disponible"]
+        stock:
+          type: integer
+          description: Product stock.
+        category:
+          type: string
+          description: Product category.
+        owner:
+          type: string
+          enum: ["admin", "premiumUserId"]
+      example:
+        title: Collar para perros M.
+        description: Collar elastizado para perros talle medium.
+        code: 445566
+        price: 3000
+        status: disponible
+        stock: 76
+        category: Collares
+        owner: admin
+        _id: 64dbafcd2052584634915ab3
+    DeletedProduct:
+      type: object
+      description: Deleted product schema.
+      properties:
+        acknowledged:
+          type: boolean
+          description: Acknowledged deletion command result.
+        deletedCount:
+          type: integer
+          description: Deletion count.
+      example:
+        acknowledged: true 
+        deletedCount: 1
+  ProductServerError:
+    getProducts:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error's description.
+      example:
+        status: 500
+        message: Server side error - in getProducts - product.controller.js
+    createProduct:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error's description.
+      example:
+        status: 500
+        message: Server side error - in createProduct - product.controller.js
+    getProductById:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error's description.
+      example:
+        status: 500
+        message: Server side error - in getProductById - product.controller.js
+    updateProductById:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error's description.
+      example:
+        status: 500
+        message: Server side error - in updateProductById - product.controller.js
+    deleteProductById:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error's description.
+      example:
+        status: 500
+        message: Server side error - in deleteProductById - product.controller.js
+  requestBodies:
+    createProduct:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Product title.
+        description:
+          type: string
+          description: Product description.
+        code:
+          type: integer
+          description: Product code.
+        price:
+          type: integer
+          description: Product price.
+        status:
+          type: string
+          description: Product status.
+          enum: ["no disponible", "disponible"]
+        stock:
+          type: integer
+          description: Product stock.
+        category:
+          type: string
+          description: Product category.
+      example:
+        title: Collar para perros M.
+        description: Collar elastizado para perros talle medium.
+        code: 445566
+        price: 3000
+        status: disponible
+        stock: 76
+        category: Collares
+    updateProduct:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Product title.
+        description:
+          type: string
+          description: Product description.
+        code:
+          type: integer
+          description: Product code.
+        price:
+          type: integer
+          description: Product price.
+        status:
+          type: string
+          description: Product status.
+          enum: ["no disponible", "disponible"]
+        stock:
+          type: integer
+          description: Product stock.
+        category:
+          type: string
+          description: Product category.
+      example:
+        title: Collar para perros M.
+        description: Collar elastizado para perros talle medium.
+        code: 445566
+        price: 3000
+        status: disponible
+        stock: 76
+        category: Collares
+    updateProductInCart:
+      type: object
+      properties:
+        quantity:
+          type: integer
+          description: New product quantity.
+      example:
+        quantity: 10

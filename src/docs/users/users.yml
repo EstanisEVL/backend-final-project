@@ -1,12 +1,12 @@
 paths:
   /api/v1/users:
     get:
-      summary: Returns all users in data base.
+      summary: Returns all users in the data base.
       tags:
         - Users
       responses:
         "200":
-          description: Successfully returns all existing users in the data base.
+          description: Ok.
           content:
             application/json:
               schema:
@@ -20,26 +20,240 @@ paths:
               schema:
                 $ref: "#components/UserServerError/getUsers"
     delete:
-      summary: Deletes all users in data base that have been inactive for the last 48 hours.
+      summary: Deletes all users in the data base that have been inactive for the last 48 hours.
       tags:
         - Users
       responses:
         "200":
-          description:
+          description: Ok.
           content:
             application/json:
               schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Inactive users successfully notified and deleted.
+                example:
+                  message: Inactive users successfully notified and deleted.
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_email_not_sent:
+                    type: string
+                    description: Email could not be sent to user.
+              example:
+                message: Error - Email could not be sent to user.
+        "404":
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_no_inactive_users:
+                    type: string
+                    description: No inactive users found.
+              example:
+                message: Error - No inactive users found.
         "500":
           description: Server side error.
           content:
             application/json:
               schema:
                 $ref: "#components/UserServerError/deleteUsers"
+  /api/v1/users/premium/{uid}:
+    get:
+      summary: Toggles a user's role from "user" to "premium", and vice versa.
+      tags:
+        - Users
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          description: User id.
+          schema:
+            $type: ObjectId
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Role changed to user/premium.
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_invalid_mongoid:
+                    type: string
+                    description: Id in params is not a valid Mongo Id.
+                  error_admin_role:
+                    type: string
+                    description: Admin cannot change its role.
+                  error_missing_docs:
+                    type: string
+                    description: User cannot be premium until it finishes uploading required documents.
+              examples:
+                invalid_mongoid_example:
+                  summary: Id is not a valid Mongo Id.
+                  value:
+                    message: Error - id is not a valid Mongo Id.
+                admin_role_example:
+                  summary: Admin cannot change its role.
+                  value:
+                    message: Error - Admin cannot change its role.
+                missing_docs_example:
+                  summary: User cannot be premium until it finishes uploading required documentation.
+                  value:
+                    message: Error - User cannot be premium until it finishes uploading required documentation.
+        "404":
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Error - User not found.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Status code 500.
+                  message:
+                    type: string
+                    description: Server side error description.
+              example:
+                status: 500
+                message: Server side error - in togglePremium - user.controller.js
+
+  /api/v1/users/{uid}/documents:
+    post:
+      summary: Uploads user's documents to server.
+      tags:
+        - Users
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          description: User id.
+          schema:
+            $type: ObjectId
+      requestBody:
+        description: Enter document's info to upload it to api.
+        content:
+          application/json:
+            schema:
+              $ref: "#components/requestBodies/uploadDocuments"
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Documents successfully uploaded.
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_invalid_mongoid:
+                    type: string
+                    description: Id in params is not a valid Mongo Id.
+                  error_invalid_file:
+                    type: string
+                    description: Invalid file type.
+              examples:
+                invalid_mongoid_example:
+                  summary: Id is not a valid Mongo Id.
+                  value:
+                    message: Error - id is not a valid Mongo Id.
+                invalid_file_example:
+                  summary: Invalid file type.
+                  value:
+                    message: Error - Invalid file type.
+        "404":
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_user_not_found:
+                    type: string
+                    description: User not found.
+                  error_files_not_found:
+                    type: string
+                    description: No files found.
+              examples:
+                user_not_found_example:
+                  summary: User not found.
+                  value:
+                    message: Error - User not found.
+                files_not_found_example:
+                  summary: No files found.
+                  value:
+                    message: Error - No files found.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: Status code 500.
+                  uploader_error:
+                    type: string
+                    description: Uploader Error.
+                  server_error:
+                    type: string
+                    description: Server side error.
+              examples:
+                uploader_error_example:
+                  summary: Uploader error.
+                  value:
+                    status: 500
+                    message: Uploader Error - error.
+                server_error_example:
+                  summary: Server side error.
+                  value:
+                    status: 500
+                    message: Server side error - in uploadDocuments - user.controller.js.
+
 components:
   schemas:
     Users:
       type: object
-      description: User schema.
+      description: User's array schema.
       properties:
         _id:
           type: ObjectId
@@ -54,7 +268,7 @@ components:
           type: string
           description: User's role.
       example:
-        message: Users in data base - 
+        message: Users in data base -
         users:
           - _id: 651c93389a348738a43a73b6
             name: Jose Herrera
@@ -62,7 +276,7 @@ components:
             role: PREMIUM
           - _id: 651c15a1b7c3f377c52da645
             name: Prueba Nuevo
-            email: prueba@hotmail.com,
+            email: prueba@hotmail.com
             role: USER
   UserServerError:
     getUsers:
@@ -73,7 +287,7 @@ components:
           description: Status code 500
         message:
           type: string
-          description: Server side's error description.
+          description: Server side error.
       example:
         status: 500
         message: Server side error - in getUsers - user.controller.js.
@@ -90,3 +304,7 @@ components:
         status: 500
         message: Server side error - in deleteUsers - user.controller.js.
   requestBodies:
+    uploadDocuments:
+      type: object
+      example:
+        { type: document, document_type: identificacion, documents: logo0.png }

@@ -1,0 +1,565 @@
+paths:
+  /api/carts:
+    get:
+      summary: Returns all existing carts in data base.
+      tags:
+        - Carts
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  carts:
+                    type: array
+                    items:
+                      $ref: "#components/schemas/Cart"
+                example:
+                  message: Carts in data base -
+                  carts: [{ _id: 651c93679a348738a43a73b9, products: [] }]
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/cartServerError/getCarts"
+    post:
+      summary: Creates a cart.
+      tags:
+        - Carts
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  cart:
+                    type: object
+                    $ref: "#components/schemas/Cart"
+                example:
+                  message: Created cart -
+                  cart: [{ _id: 651c93679a348738a43a73b9, products: [] }]
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/cartServerError/createCart"
+  /api/carts/{cid}:
+    get:
+      summary: Returns a cart by id.
+      tags:
+        - Carts
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          description: Cart id.
+          schema:
+            $type: ObjectId
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  cart:
+                    type: array
+                    items:
+                      $ref: "#components/schemas/Cart"
+                example:
+                  message: Cart -
+                  cart: [{ _id: 651c93679a348738a43a73b9, products: [] }]
+        "404":
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Error - Cart not found.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/cartServerError/getCartById"
+    delete:
+      summary: Deletes a cart by id.
+      tags:
+        - Carts
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          description: Cart id.
+          schema:
+            $type: ObjectId
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Cart successfully deleted.
+        "404":
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Error - Cart not found.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/cartServerError/deleteCartById"
+  /api/carts/{cid}/purchase:
+    post:
+      summary: Confirms purchase of existing products in cart.
+      tags:
+        - Carts
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          description: Cart id.
+          schema:
+            $type: ObjectId.
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Purchase successfully completed.
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Not enough stock of product name.
+        "404":
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_cart_not_found:
+                    type: string
+                    description: Error - Cart not found.
+                  error_empty_cart:
+                    type: string
+                    description: Error - Cart is empty.
+                  error_product_not_in_stock:
+                    type: string
+                    description: Error - Product is not in stock.
+              examples:
+                cart_not_found_example:
+                  summary: Cart not found in data base.
+                  value:
+                    message: Error - Cart not found.
+                empty_cart_example:
+                  summary: Cart is empty.
+                  value:
+                    message: Error - Cart is empty.
+                product_not_in_stock_example:
+                  summary: Product out of stock.
+                  value:
+                    message: Error - Product is not in stock.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/cartServerError/purchaseProducts"
+  /api/carts/{cid}/products/{pid}:
+    post:
+      summary: Adds a product to a cart by id.
+      tags:
+        - Carts
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          description: Cart id.
+          schema:
+            $type: ObjectId
+        - name: pid
+          in: path
+          required: true
+          description: Product id.
+          schema:
+            $type: ObjectId
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success_quantity_updated:
+                    type: string
+                    description: Selected product's quantity updated.
+                  success_product_added:
+                    type: string
+                    description: Selected product added to cart.
+              examples:
+                quantity_updated_example:
+                  summary: Selected product's quantity successfully updated.
+                  value:
+                    message: Product quantity updated.
+                product_added_example:
+                  summary: Selected product successfully added to cart.
+                  value:
+                    message: Product added to cart.
+        "404":
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_product_not_found:
+                    type: string
+                    description: Product not found.
+                  error_cart_not_found:
+                    type: string
+                    description: Cart not found.
+              examples:
+                product_not_found_example:
+                  summary: Product not found in data base.
+                  value:
+                    message: Error - Product not found.
+                cart_not_found_example:
+                  summary: Cart not found in data base.
+                  value:
+                    message: Error - Cart not found.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/cartServerError/addProductToCart"
+    put:
+      summary: Updates a product in the cart by its id.
+      tags:
+        - Carts
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          description: Cart id.
+          schema:
+            $type: ObjectId
+        - name: pid
+          in: path
+          required: true
+          description: Product id.
+          schema:
+            $type: ObjectId
+      requestBody:
+        description: Update a product in a cart.
+        content:
+          application/json:
+            schema:
+              $ref: "#components/requestBodies/updateProductInCart"
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Product quantity succesfully updated.
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Error - Only add or remove operations are valid.
+        "404":
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_cart_not_found:
+                    type: string
+                    description: Cart not found in data base.
+                  error_product_not_in_cart:
+                    type: string
+                    description: Product is not in cart.
+              examples:
+                cart_not_found_example:
+                  summary: Cart not found in data base.
+                  value:
+                    message: Error - Cart not found.
+                product_not_in_cart:
+                  summary: Product is not in cart.
+                  value:
+                    message: Error - Product does not exist in cart.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/cartServerError/updateProductFromCart"
+    delete:
+      summary: Deletes a product from a cart by its id.
+      tags:
+        - Carts
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          description: Cart id.
+          schema:
+            $type: ObjectId
+        - name: pid
+          in: path
+          required: true
+          description: Product id.
+          schema:
+            $type: ObjectId
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success_quantity_updated:
+                    type: string
+                    description: 
+                  success_product_deleted:
+                    type: string
+                    description:
+              examples:
+                quantity_updated_example:
+                  summary: Product in cart's quantity successfully updated.
+                  value:
+                    message: Product quantity updated.
+                product_deleted_example:
+                  summary: Product successfully deleted from cart.
+                  value:
+                    message: Product deleted from cart.
+        "404":
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_cart_not_found:
+                    type: string
+                    description: Cart not found in data base.
+                  error_product_not_in_cart:
+                    type: string
+                    description: Product is not in cart.
+              examples:
+                cart_not_found_example:
+                  summary: Cart not found in data base.
+                  value:
+                    message: Error - Cart not found.
+                product_not_in_cart:
+                  summary: Product is not in cart.
+                  value:
+                    message: Error - Product does not exist in cart.
+        "500":
+          description: Server side error.
+          content:
+            application/json:
+              schema:
+                $ref: "#components/cartServerError/deleteProductFromCart"
+
+components:
+  schemas:
+    Cart:
+      type: object
+      description: Cart schema.
+      properties:
+        _id:
+          type: ObjectId
+          description: Id generated by mongo.
+        products:
+          type: array
+          description: Array of existing products in cart.
+      example:
+        _id: 64dcd2cbf32653bce70070bf
+        products: []
+      UpdatedCart:
+        type: object
+        description: Updated cart schema.
+        properties:
+          _id:
+            type: ObjectId
+            description: Id generated by mongo.
+          products:
+            type: array
+            description: Array of existing products in cart.
+        example:
+          _id: 64dcd2cbf32653bce70070bf
+          products:
+            [
+              { product: 64d64e95f0a8421ee857819d, quantity: 1 },
+              { product: 64dbafcd2052584634915ab3, quantity: 2 },
+            ]
+  cartServerError:
+    getCarts:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error's description.
+      example:
+        status: 500
+        message: Server side error - in getCarts - cart.controller.js
+    getCartById:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error's description.
+      example:
+        status: 500
+        message: Server side error - in getCartById - cart.controller.js
+    createCart:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error's description.
+      example:
+        status: 500
+        message: Server side error - in createCart - cart.controller.js
+    addProductToCart:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error's description.
+      example:
+        status: 500
+        message: Server side error - in addProductToCart - cart.controller.js
+    updateProductFromCart:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error's description.
+      example:
+        status: 500
+        message: Server side error - in updateProductFromCart - cart.controller.js
+    deleteCartById:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error's description.
+      example:
+        status: 500
+        message: Server side error - in deleteCartById - cart.controller.js
+    deleteProductFromCart:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Server side error's description.
+      example:
+        status: 500
+        message: Server side error - in deleteProductFromCart - cart.controller.js
+    purchaseProducts:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Status code 500
+        message:
+          type: string
+          description: Description of the server side errorServer side error's description.
+      example:
+        status: 500
+        message: Server side error - in purchaseProducts - cart.controller.js
+  requestBodies:
+    updateCart:
+      type: object
+      example:
+        products:
+          [
+            { product: 64d64e95f0a8421ee857819d, quantity: 1 },
+            { product: 64dbafcd2052584634915ab3, quantity: 2 },
+          ]
+    updateProductInCart:
+      type: object
+      example: 
+        { quantity: 5, operation: add }

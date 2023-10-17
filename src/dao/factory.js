@@ -4,6 +4,7 @@ import Connection from "../utils/connect.js";
 export let Carts;
 export let Products;
 export let Users;
+export let Tickets;
 
 switch (PERSISTENCE) {
   case "MONGO":
@@ -17,9 +18,13 @@ switch (PERSISTENCE) {
     const { default: ProductServiceDao } = await import(
       "../dao/mongodb/product.mongo.js"
     );
+    const { default: TicketServiceDao } = await import(
+      "../dao/mongodb/ticket.mongo.js"
+    );
 
+    Users = UserServiceDao;
     Carts = CartServiceDao;
     Products = ProductServiceDao;
-    Users = UserServiceDao;
+    Tickets = TicketServiceDao;
     break;
 }
