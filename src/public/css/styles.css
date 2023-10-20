@@ -115,6 +115,12 @@ section {
   margin-bottom: 1rem;
 }
 
+.h3-profile {
+  user-select: none;
+  font-size: clamp(1rem, 1.5vw, 2rem);
+  margin: 1rem 0;
+}
+
 .h4 {
   user-select: none;
 }

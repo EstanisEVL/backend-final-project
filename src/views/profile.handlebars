@@ -54,8 +54,8 @@
                 {{#each productsInCart}}
                   <div class="card-container">
                     <div class="card">
-                      <h4>{{this.category}}</h4>
-                      <h3>{{this.title}}</h3>
+                      <h4 class="h4">{{this.category}}</h4>
+                      <h3 class="h3">{{this.title}}</h3>
                       <p>{{this.description}}</p>
                       <p>${{this.price}}</p>
                       <div class="card-btn-container">
@@ -70,6 +70,15 @@
                   </div>
                 {{/each}}
               </div>
+            </div>
+            <div class="column">
+              <div class="row">
+                <h3 class="h3-profile">Cantidad de productos: {{totalProducts}}</h3>
+              </div>
+              <div class="row">
+                <h3 class="h3-profile">Total: $ {{fullPrice}}</h3>
+              </div>
+
             </div>
             <div class="btn-container">
               <button

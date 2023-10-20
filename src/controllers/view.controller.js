@@ -82,6 +82,8 @@ export const profile = async (req, res) => {
     const productsRender = filteredDocs.map(
       (prod) => new ProductDTO(prod, findCart._id.toHexString())
     );
+    let totalProductsQuantity = findCart.products.reduce((total, prod) => total + prod.quantity, 0);
+    let totalProductsPrice = findCart.products.reduce((total, prod) => total + prod.quantity * prod.product.price , 0);
 
     res.status(200).render("profile", {
       style: "styles.css",
@@ -98,6 +100,8 @@ export const profile = async (req, res) => {
           : "Productos en el carrito:",
       productsInCart: productsInCart,
       products: productsRender,
+      totalProducts: totalProductsQuantity,
+      fullPrice: totalProductsPrice,
     });
   } catch (err) {
     req.logger.error(err);

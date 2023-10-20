@@ -1,6 +1,5 @@
 import { sendDeletedProductMail } from "../helpers/email.helper.js";
 import { ProductService, UserService } from "../repositories/index.js";
-import validationUtils from "../utils/validate.js";
 
 export const getProducts = async (req, res) => {
   try {
@@ -36,7 +35,6 @@ export const getProductById = async (req, res) => {
   }
 };
 
-// QUE NO ABANDONE LA PÁGINA DEL ADMIN CUANDO CREA EXITOSAMENTE EL PRODUCTO:
 export const createProduct = async (req, res) => {
   try {
     const product = req.body;
