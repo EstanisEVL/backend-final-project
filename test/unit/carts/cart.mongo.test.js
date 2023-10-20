@@ -4,7 +4,7 @@ import { MONGO_URL } from "../../../src/config/config.js";
 import Carts from "../../../src/dao/mongodb/cart.mongo.js";
 import CartDTO from "../../../src/dtos/cart.dto.js";
 
-describe("Should test Cart dao methods", () => {
+describe("Should test Cart dao methods.", () => {
   let cartDao;
 
   before(async () => {

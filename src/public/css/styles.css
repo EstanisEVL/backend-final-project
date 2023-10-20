@@ -227,10 +227,25 @@ section {
   gap: 2rem;
 }
 
+.product-card-section {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 5%;
+}
+
 .card-container {
   background-color: #f9f9f9;
   color: #100e10;
   border-radius: 10px;
+}
+
+.product-card-container {
+  background-color: #f9f9f9;
+  color: #100e10;
+  border-radius: 10px;
+  width: 30%;
 }
 
 .card {
