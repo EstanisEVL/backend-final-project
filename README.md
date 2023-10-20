@@ -11,6 +11,7 @@
 2. [Environment variables](#environment-variables).
 3. [How to run the app](#how-to-run-the-app).
 4. [Test coverage](#test-coverage).
+5. [API docs](#api-docs).
 
 ---
 
@@ -197,3 +198,15 @@ npm run test:functional:products
 npm run test:functional:tickets
 npm run test:functional:users
 ```
+---
+
+### API docs:
+
+This project utilizes Swagger for API documentation and exploration. You can access the Swagger UI to view and test the API endpoints by following these steps:
+
+1. Ensure the project is running (the API server is up).
+2. Open a web browser and navigate to the Swagger UI URL, typically available at: `http://localhost:PORT/api/API_VERSION/docs`
+Replace `PORT` with the actual port your API server is running on.
+3. You'll be presented with the Swagger UI interface where you can explore the available endpoints, make test requests, and access detailed documentation.
+
+---
