@@ -38,13 +38,11 @@ const initializePassport = () => {
       {
         clientID: GITHUB_CLIENT_ID,
         clientSecret: GITHUB_CLIENT_SECRET,
-        // CAMBIAR callback url en github:
         callbackURL: `http://localhost:${PORT}/api/v1/sessions/githubcallback`,
       },
       async (accesToken, refreshToken, profile, done) => {
         try {
           const user = await UserService.findUser(profile._json.email);
-          console.log(user);
 
           if (!user) {
             let addNewUser = {

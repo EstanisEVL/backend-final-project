@@ -1,0 +1,114 @@
+<main>
+  <section class="profile-section">
+    <div class="row">
+      <div class="column">
+        <div>
+          <h1 class="h1">BLKY Pets</h1>
+        </div>
+        <div>
+          <h3 class="h3">Accesorios para mascotas.</h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="column dark">
+      <div class="profile-column profile-panel">
+        <div class="row">
+          <h2 class="h2 h2-margin">Información de usuario</h2>
+        </div>
+
+        <div class="row profile-panel-info profile-panel-margin">
+          <div class="profile-row">
+            <div class="label-row">
+              <p class="info-label">Nombre:</p>
+              <p class="info-data">{{this.first_name}}</p>
+            </div>
+            <div class="label-row">
+              <p class="info-label">Edad:</p>
+              <p class="info-data">{{this.age}}</p>
+            </div>
+            <div class="label-row">
+              <p class="info-label">Correo electrónico:</p>
+              <p class="info-data">{{this.email}}</p>
+            </div>
+            <div class="label-row">
+              <p class="info-label">Rol:</p>
+              <p class="info-data">{{this.role}}</p>
+            </div>
+            <form action="/api/v1/sessions/logout" method="get">
+              <button type="submit" class="btn btn-remove">Cerrar sesión</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="row">
+            <h2 class="h2 h2-margin">Carrito</h2>
+          </div>
+          <div>
+            <div class="row">
+              <h3 class="h3">{{productsTitle}}</h3>
+            </div>
+            <div>
+              <div class="card-section">
+                {{#each productsInCart}}
+                  <div class="card-container">
+                    <div class="card">
+                      <h4>{{this.category}}</h4>
+                      <h3>{{this.title}}</h3>
+                      <p>{{this.description}}</p>
+                      <p>${{this.price}}</p>
+                      <div class="card-btn-container">
+                        <button
+                          class="btn btn-remove delete-btn"
+                          data-product-id="{{this.id}}"
+                          data-cart-id="{{this.cid}}"
+                        >Quitar</button>
+                      </div>
+
+                    </div>
+                  </div>
+                {{/each}}
+              </div>
+            </div>
+            <div class="btn-container">
+              <button
+                class="btn btn-submit submit-btn"
+                data-cart-id="{{cid}}"
+                data-user="{{email}}"
+              >Comprar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="row">
+            <h2 class="h2 h2-margin">Lista de productos</h2>
+          </div>
+          <div class="card-section">
+            {{#each products}}
+              <div class="card-container">
+                <div class="card">
+                  <h4 class="h4">{{this.category}}</h4>
+                  <h3 class="h3">{{this.title}}</h3>
+                  <p class="card-p">{{this.description}}</p>
+                  <p class="card-p">$ {{this.price}}</p>
+                  <p class="card-p">Creado por:
+                    {{this.owner}}</p>
+                  <div class="card-btn-container">
+                    <button
+                      class="btn btn-add add-btn"
+                      data-product-id="{{this.id}}"
+                      data-cart-id="{{this.cid}}"
+                    >Agregar</button>
+                  </div>
+                </div>
+              </div>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="/js/index.js"></script>

@@ -42,9 +42,7 @@ describe("Functional test - Should test User endpoints.", () => {
       .post(`${SESSION_ROUTES}/register`)
       .send(userBody);
 
-    expect(registerCode).to.equal(200);
-    expect(registerBody).to.have.property("user");
-    expect(registerBody.user).to.have.property("id");
+    expect(registerCode).to.equal(302);
 
     // Iniciar sesión:
     const { statusCode: loginCode, _body: loginBody } = await requester
@@ -52,15 +50,13 @@ describe("Functional test - Should test User endpoints.", () => {
       .send({ email: userBody.email, password: userBody.password });
 
     expect(loginCode).to.equal(200);
-    expect(loginBody).to.have.property("user");
-    expect(loginBody.user).to.have.property("email");
-    expect(loginBody.user).to.have.property("last_connection");
 
-    const user = await UserService.findUser(loginBody.user.email);
+    const user = await UserService.findUser(userBody.email);
 
+    // Cambiar la fecha de su última conexión para que coincida con el criterio de inactividad:
     const currentDate = new Date();
     const date = new Date(currentDate);
-    date.setDate(currentDate.getDate() - 3);
+    date.setDate(currentDate.getDate() - 2);
 
     user.last_connection = date;
 
@@ -97,7 +93,7 @@ describe("Functional test - Should test User endpoints.", () => {
       document_type: "identificacion",
     };
 
-    const { statusCode, ok, _body } = await requester
+    const { statusCode, _body } = await requester
       .post(`${USER_ROUTES}/${uid}/documents`)
       .field("type", doc.type)
       .field("document_type", doc.document_type)
@@ -158,7 +154,7 @@ describe("Functional test - Should test User endpoints.", () => {
     }
 
     // Cambiar el rol a premium:
-    const { statusCode, ok, _body } = await requester.get(
+    const { statusCode, _body } = await requester.get(
       `${USER_ROUTES}/premium/${uid}`
     );
 

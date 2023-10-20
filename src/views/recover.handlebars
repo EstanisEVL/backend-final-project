@@ -1,0 +1,55 @@
+<main>
+  <section>
+    <div class="row">
+      <div class="column">
+        <div class="h1-margin">
+          <h1 class="h1">BLKY Pets</h1>
+        </div>
+        <div>
+          <h3 class="h3">Accesorios para mascotas.</h3>
+        </div>
+      </div>
+
+      <div class="column box dark">
+        <div class="row">
+          <h2 class="h2-recover">Recuperación de contraseña</h2>
+        </div>
+
+        <div>
+          <form action="/api/v1/sessions/recover" method="post">
+            <div class="row box-margin">
+              <p class="p">Ingresa tu correo electrónico y te enviaremos un link para que
+                reestablezcas tu contraseña.</p>
+            </div>
+            <div class="column">
+              <label class="label" for="email">Correo electrónico:</label>
+              <input
+                class="input"
+                type="email"
+                name="email"
+                id="email"
+                placeholder="Ingresa tu correo electrónico"
+                required
+              />
+            </div>
+            <div class="row btn-container">
+              <button class="btn btn-submit" type="submit">Recibir email</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="row box-padding-recover">
+          <p class="p">¿Ya tienes usuario? Haz
+            <a href="/login">click aquí</a>
+            para iniciar sesión.</p>
+        </div>
+
+        <div class="row box-padding-recover">
+          <p class="p">¿No estás registrado? Registrate haciendo
+            <a href="/register">click aquí</a>.</p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+</main>

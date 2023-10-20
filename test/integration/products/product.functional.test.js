@@ -83,7 +83,6 @@ describe("Functional test - Should test Product endpoints.", () => {
     authToken = res.headers["set-cookie"][0];
 
     expect(res.statusCode).to.equal(200);
-    expect(res._body).to.have.property("admin");
 
     // Crear un producto de prueba:
     const productDto = new ProductDTO(mockProduct);
@@ -119,7 +118,6 @@ describe("Functional test - Should test Product endpoints.", () => {
     authToken = res.headers["set-cookie"][0];
 
     expect(res.statusCode).to.equal(200);
-    expect(res._body).to.have.property("admin");
 
     // Crear un producto de prueba:
     const productDto = new ProductDTO(mockProduct);
@@ -173,7 +171,6 @@ describe("Functional test - Should test Product endpoints.", () => {
     authToken = res.headers["set-cookie"][0];
 
     expect(res.statusCode).to.equal(200);
-    expect(res._body).to.have.property("admin");
 
     // Crear un producto de prueba:
     const productDto = new ProductDTO(mockProduct);
@@ -208,16 +205,16 @@ describe("Functional test - Should test Product endpoints.", () => {
       password: "123456aA$",
     };
 
-    const { statusCode: registerCode, _body: registerBody } = await requester
+    const { statusCode: registerCode } = await requester
       .post(`${SESSION_ROUTES}/register`)
       .send(userBody);
 
-    expect(registerCode).to.equal(200);
-    expect(registerBody).to.have.property("user");
-    expect(registerBody.user).to.have.property("id");
+    expect(registerCode).to.equal(302);
+
+    const user = await UserService.findUser(userBody.email);
 
     // Obtener uid:
-    const uid = String(registerBody.user.id);
+    const uid = String(user.id);
 
     // Subir documentos:
     const docs = [
@@ -273,7 +270,6 @@ describe("Functional test - Should test Product endpoints.", () => {
     authToken = res.headers["set-cookie"][0];
 
     expect(res.statusCode).to.equal(200);
-    expect(res._body).to.have.property("user");
 
     // Crear un producto de prueba:
     const productDto = new ProductDTO(mockProduct);
@@ -298,8 +294,9 @@ describe("Functional test - Should test Product endpoints.", () => {
     expect(_body.message).to.equal("Product deleted - ");
 
     // Eliminar el usuario y su carrito de la base de datos:
-    const cid = String(res._body.user.userCarts._id);
-
+    const updatedUser = await UserService.findUser(userBody.email);
+    const cid = String(updatedUser.carts[0]._id);
+    
     await UserService.deleteUser(uid);
     await CartService.deleteCartById(cid);
   });
@@ -318,12 +315,12 @@ describe("Functional test - Should test Product endpoints.", () => {
       .post(`${SESSION_ROUTES}/register`)
       .send(userBody);
 
-    expect(registerCode).to.equal(200);
-    expect(registerBody).to.have.property("user");
-    expect(registerBody.user).to.have.property("id");
+    expect(registerCode).to.equal(302);
 
     // Obtener uid:
-    const uid = String(registerBody.user.id);
+    const user = await UserService.findUser(userBody.email)
+
+    const uid = String(user.id);
 
     // Subir documentos:
     const docs = [
@@ -379,7 +376,6 @@ describe("Functional test - Should test Product endpoints.", () => {
     authToken = res.headers["set-cookie"][0];
 
     expect(res.statusCode).to.equal(200);
-    expect(res._body).to.have.property("user");
 
     // Crear un producto de prueba:
     const productDto = new ProductDTO(mockProduct);
@@ -393,13 +389,11 @@ describe("Functional test - Should test Product endpoints.", () => {
     expect(createBody.productBody).to.have.property("_id");
 
     // Cerrar sesión:
-    const { statusCode: logoutCode, _body: logoutBody } = await requester
+    const { statusCode: logoutCode } = await requester
       .get(`${SESSION_ROUTES}/logout`)
       .set("Cookie", authToken);
 
-    expect(logoutCode).to.equal(200);
-    expect(logoutBody).to.have.property("message");
-    expect(logoutBody.message).to.equal("User successfully logged out.");
+    expect(logoutCode).to.equal(302);
 
     // Iniciar sesión como admin:
     const adminBody = {
@@ -417,7 +411,6 @@ describe("Functional test - Should test Product endpoints.", () => {
     authToken = adminRes.headers["set-cookie"][0];
 
     expect(adminRes.statusCode).to.equal(200);
-    expect(adminRes._body).to.have.property("admin");
 
     // Eliminar producto creado por el usuario premium:
     const pid = String(createBody.productBody._id);
@@ -427,12 +420,12 @@ describe("Functional test - Should test Product endpoints.", () => {
       .set("Cookie", authToken);
 
     expect(statusCode).to.equal(200);
-    console.log(_body);
     expect(_body).to.have.property("message");
     expect(_body.message).to.equal("Product deleted - ");
 
     // Eliminar el usuario y su carrito de la base de datos:
-    const cid = String(res._body.user.userCarts._id);
+    const updatedUser = await UserService.findUser(userBody.email);
+    const cid = String(updatedUser.carts[0]._id);
 
     await UserService.deleteUser(uid);
     await CartService.deleteCartById(cid);

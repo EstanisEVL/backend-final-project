@@ -38,7 +38,6 @@ describe("Functional test - Should test Cart endpoints.", () => {
     authToken = res.headers["set-cookie"][0];
 
     expect(res.statusCode).to.equal(200);
-    expect(res._body).to.have.property("admin");
 
     // Obtener carritos:
     const { statusCode, _body } = await requester
@@ -94,11 +93,11 @@ describe("Functional test - Should test Cart endpoints.", () => {
       password: "123456aA$",
     };
 
-    const { statusCode: registerCode, _body: registerBody } = await requester
+    const { statusCode: registerCode } = await requester
       .post(`${SESSION_ROUTES}/register`)
       .send(userBody);
 
-    expect(registerCode).to.equal(200);
+    expect(registerCode).to.equal(302);
 
     // Iniciar sesión:
     const res = await requester
@@ -110,15 +109,15 @@ describe("Functional test - Should test Cart endpoints.", () => {
     };
     authToken = res.headers["set-cookie"][0];
 
-    expect(res._body).to.have.property("user");
-    expect(res._body.user).to.have.property("userCarts");
+    expect(res.statusCode).to.equal(200);
 
     // Buscar productos:
     const products = await ProductService.getAllProducts();
     const pid = String(products[0]._id);
 
     // Agregar el producto al carrito:
-    const cid = String(res._body.user.userCarts._id);
+    const user = await UserService.findUser(userBody.email);
+    const cid = String(user.carts[0]._id);
 
     const { statusCode, _body } = await requester
       .post(`${CART_ROUTES}/${cid}/products/${pid}`)
@@ -129,8 +128,6 @@ describe("Functional test - Should test Cart endpoints.", () => {
     expect(_body.message).to.equal("Product added to cart.");
 
     // Eliminar el usuario y su carrito de la base de datos:
-    const user = await UserService.findUser(userBody.email);
-
     const uid = String(user.id);
 
     await UserService.deleteUser(uid);
@@ -151,7 +148,7 @@ describe("Functional test - Should test Cart endpoints.", () => {
       .post(`${SESSION_ROUTES}/register`)
       .send(userBody);
 
-    expect(registerCode).to.equal(200);
+    expect(registerCode).to.equal(302);
 
     // Iniciar sesión:
     const res = await requester
@@ -163,15 +160,15 @@ describe("Functional test - Should test Cart endpoints.", () => {
     };
     authToken = res.headers["set-cookie"][0];
 
-    expect(res._body).to.have.property("user");
-    expect(res._body.user).to.have.property("userCarts");
+    expect(res.statusCode).to.equal(200);
 
     // Buscar productos:
     const products = await ProductService.getAllProducts();
     const pid = String(products[0]._id);
 
     // Agregar el producto al carrito:
-    const cid = String(res._body.user.userCarts._id);
+    const user = await UserService.findUser(userBody.email);
+    const cid = String(user.carts[0]._id);
 
     const { statusCode: addCode, _body: addBody } = await requester
       .post(`${CART_ROUTES}/${cid}/products/${pid}`)
@@ -215,8 +212,6 @@ describe("Functional test - Should test Cart endpoints.", () => {
     );
 
     // Eliminar el usuario y su carrito de la base de datos:
-    const user = await UserService.findUser(userBody.email);
-
     const uid = String(user.id);
 
     await UserService.deleteUser(uid);
@@ -239,7 +234,6 @@ describe("Functional test - Should test Cart endpoints.", () => {
     authToken = res.headers["set-cookie"][0];
 
     expect(res.statusCode).to.equal(200);
-    expect(res._body).to.have.property("admin");
 
     // Crear carrito:
     const cartDto = new CartDTO();
@@ -271,7 +265,7 @@ describe("Functional test - Should test Cart endpoints.", () => {
       .post(`${SESSION_ROUTES}/register`)
       .send(userBody);
 
-    expect(registerCode).to.equal(200);
+    expect(registerCode).to.equal(302);
 
     // Iniciar sesión:
     const res = await requester
@@ -283,15 +277,15 @@ describe("Functional test - Should test Cart endpoints.", () => {
     };
     authToken = res.headers["set-cookie"][0];
 
-    expect(res._body).to.have.property("user");
-    expect(res._body.user).to.have.property("userCarts");
+    expect(res.statusCode).to.equal(200);
 
     // Buscar productos:
     const products = await ProductService.getAllProducts();
     const pid = String(products[0]._id);
 
     // Agregar el producto al carrito:
-    const cid = String(res._body.user.userCarts._id);
+    const user = await UserService.findUser(userBody.email);
+    const cid = String(user.carts[0]._id);
 
     const { statusCode: addCode, _body: addBody } = await requester
       .post(`${CART_ROUTES}/${cid}/products/${pid}`)
@@ -311,8 +305,6 @@ describe("Functional test - Should test Cart endpoints.", () => {
     expect(_body.message).to.equal("Product deleted from cart.");
 
     // Eliminar el usuario y su carrito de la base de datos:
-    const user = await UserService.findUser(userBody.email);
-
     const uid = String(user.id);
 
     await UserService.deleteUser(uid);
@@ -333,7 +325,7 @@ describe("Functional test - Should test Cart endpoints.", () => {
       .post(`${SESSION_ROUTES}/register`)
       .send(userBody);
 
-    expect(registerCode).to.equal(200);
+    expect(registerCode).to.equal(302);
 
     // Iniciar sesión:
     const res = await requester
@@ -345,15 +337,15 @@ describe("Functional test - Should test Cart endpoints.", () => {
     };
     authToken = res.headers["set-cookie"][0];
 
-    expect(res._body).to.have.property("user");
-    expect(res._body.user).to.have.property("userCarts");
+    expect(res.statusCode).to.equal(200);
 
     // Buscar productos:
     const products = await ProductService.getAllProducts();
     const pid = String(products[0]._id);
 
     // Agregar el producto al carrito:
-    const cid = String(res._body.user.userCarts._id);
+    const user = await UserService.findUser(userBody.email);
+    const cid = String(user.carts[0]._id);
 
     const { statusCode: addCode, _body: addBody } = await requester
       .post(`${CART_ROUTES}/${cid}/products/${pid}`)
@@ -373,8 +365,6 @@ describe("Functional test - Should test Cart endpoints.", () => {
     expect(_body.message).to.equal("Purchase successfully completed.");
 
     // Eliminar el usuario y su carrito de la base de datos:
-    const user = await UserService.findUser(userBody.email);
-
     const uid = String(user.id);
 
     await UserService.deleteUser(uid);

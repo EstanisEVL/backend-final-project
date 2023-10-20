@@ -1,8 +1,12 @@
 import supertest from "supertest";
 import { expect } from "chai";
 import { CartService, UserService } from "../../../src/repositories/index.js";
-import { ADMIN_EMAIL, ADMIN_PASSWORD, BASE_API_URL,
-  SESSION_ROUTES } from "../../../src/config/config.js";
+import {
+  ADMIN_EMAIL,
+  ADMIN_PASSWORD,
+  BASE_API_URL,
+  SESSION_ROUTES,
+} from "../../../src/config/config.js";
 
 describe("Functional test - Should test Session endpoints", () => {
   let requester;
@@ -12,7 +16,7 @@ describe("Functional test - Should test Session endpoints", () => {
     requester = supertest(String(BASE_API_URL));
   });
 
-  it("Should test POST /api/v1/sessions/ - register a new user in database with code 200", async () => {
+  it("Should test POST /api/v1/sessions/ - register a new user in database with code 201/302", async () => {
     // Body de la petición
     const userBody = {
       first_name: "Juan",
@@ -23,17 +27,16 @@ describe("Functional test - Should test Session endpoints", () => {
     };
 
     // Crear un usuario
-    const { statusCode, ok, _body } = await requester
+    const { statusCode } = await requester
       .post(`${SESSION_ROUTES}/register`)
       .send(userBody);
 
-    expect(statusCode).to.equal(200);
-    expect(ok).to.be.ok;
-    expect(_body).to.have.property("user");
-    expect(_body.user).to.have.property("id");
+    expect(statusCode).to.equal(302);
 
     // Eliminar el usuario de la base de datos:
-    const uid = String(_body.user.id);
+    const user = await UserService.findUser(userBody.email);
+
+    const uid = String(user.id);
 
     await UserService.deleteUser(uid);
   });
@@ -49,15 +52,13 @@ describe("Functional test - Should test Session endpoints", () => {
     };
 
     // Crear un usuario
-    const { statusCode, ok, _body } = await requester
+    const { statusCode } = await requester
       .post(`${SESSION_ROUTES}/register`)
       .send(userBody);
 
-    expect(statusCode).to.equal(200);
-    expect(_body).to.have.property("user");
-    expect(_body.user).to.have.property("email");
+    expect(statusCode).to.equal(302);
 
-    const user = await UserService.findUser(_body.user.email);
+    const user = await UserService.findUser(userBody.email);
 
     // Crear el mismo usuario:
     const { statusCode: recreateUserStatus, _body: recreateUserBody } =
@@ -68,7 +69,7 @@ describe("Functional test - Should test Session endpoints", () => {
     expect(recreateUserBody.message).to.equal("Error - User already exists.");
 
     // Eliminar el usuario de la base de datos:
-    const uid = String(_body.user.id);
+    const uid = String(user.id);
 
     await UserService.deleteUser(uid);
   });
@@ -89,18 +90,20 @@ describe("Functional test - Should test Session endpoints", () => {
       _body: registerBody,
     } = await requester.post(`${SESSION_ROUTES}/register`).send(userBody);
 
-    expect(registerCode).to.equal(200);
+    expect(registerCode).to.equal(302);
 
     // Iniciar sesión:
-    const { statusCode, ok, _body } = await requester
+    const { statusCode } = await requester
       .post(`${SESSION_ROUTES}/login`)
       .send({ email: userBody.email, password: userBody.password });
 
     expect(statusCode).to.equal(200);
 
     // Eliminar el usuario y su carrito de la base de datos:
-    const uid = String(_body.user.id);
-    const cid = String(_body.user.userCarts._id);
+    const user = await UserService.findUser(userBody.email);
+
+    const uid = String(user.id);
+    const cid = String(user.carts[0]._id);
 
     await UserService.deleteUser(uid);
     await CartService.deleteCartById(cid);
@@ -113,12 +116,11 @@ describe("Functional test - Should test Session endpoints", () => {
     };
 
     // Iniciar sesión:
-    const { statusCode, ok, _body } = await requester
+    const { statusCode } = await requester
       .post(`${SESSION_ROUTES}/login`)
       .send(adminData);
 
     expect(statusCode).to.equal(200);
-    expect(_body).to.have.property("admin");
   });
 
   it("Should test POST /api/v1/sessions/login - return Error 404 - User not found.", async () => {
@@ -128,13 +130,11 @@ describe("Functional test - Should test Session endpoints", () => {
     };
 
     // Iniciar sesión:
-    const { statusCode, _body } = await requester
+    const { statusCode } = await requester
       .post(`${SESSION_ROUTES}/login`)
       .send(userData);
 
-    expect(statusCode).to.equal(404);
-    expect(_body).to.have.property("message");
-    expect(_body.message).to.equal("Error - User not found.");
+    expect(statusCode).to.equal(302);
   });
 
   it("Should test POST /api/v1/sessions/recover - Successfully send recovery email to user with code 200.", async () => {
@@ -147,24 +147,22 @@ describe("Functional test - Should test Session endpoints", () => {
     };
 
     // Crear un usuario
-    const { statusCode: registerCode, _body: registerBody } = await requester
+    const { statusCode: registerCode } = await requester
       .post(`${SESSION_ROUTES}/register`)
       .send(userBody);
 
-    expect(registerCode).to.equal(200);
+    expect(registerCode).to.equal(302);
 
     // Recuperar contraseña:
-    const { statusCode, ok, _body } = await requester
+    const { statusCode } = await requester
       .post(`${SESSION_ROUTES}/recover`)
       .send(userBody);
     expect(statusCode).to.equal(200);
-    expect(_body).to.have.property("message");
-    expect(_body.message).to.equal(
-      `Email successfully sent to ${userBody.email}. Please check your inbox to continue the recovery process.`
-    );
 
     // Eliminar el usuario de la base de datos:
-    const uid = String(registerBody.user.id);
+    const user = await UserService.findUser(userBody.email);
+
+    const uid = String(user.id);
 
     await UserService.deleteUser(uid);
   });
@@ -174,13 +172,11 @@ describe("Functional test - Should test Session endpoints", () => {
       email: "usuarioinexistente@gmail.com",
     };
 
-    const { statusCode, _body } = await requester
+    const { statusCode } = await requester
       .post(`${SESSION_ROUTES}/recover`)
       .send(userData);
 
-    expect(statusCode).to.equal(404);
-    expect(_body).to.have.property("message");
-    expect(_body.message).to.equal("Error - User not found.");
+    expect(statusCode).to.equal(302);
   });
 
   it("Should test POST /api/v1/sessions/reset - Successfully generate a new password with code 200.", async () => {
@@ -193,11 +189,11 @@ describe("Functional test - Should test Session endpoints", () => {
     };
 
     // Crear un usuario
-    const { statusCode: registerCode, _body: registerBody } = await requester
+    const { statusCode: registerCode } = await requester
       .post(`${SESSION_ROUTES}/register`)
       .send(userBody);
 
-    expect(registerCode).to.equal(200);
+    expect(registerCode).to.equal(302);
 
     // Regenerar contraseña:
     const newPasswordBody = {
@@ -205,16 +201,16 @@ describe("Functional test - Should test Session endpoints", () => {
       password: "1234567aA$",
     };
 
-    const { statusCode, ok, _body } = await requester
+    const { statusCode } = await requester
       .post(`${SESSION_ROUTES}/reset`)
       .send(newPasswordBody);
 
-    expect(statusCode).to.equal(200);
-    expect(_body).to.have.property("message");
-    expect(_body.message).to.equal("User password successfully resetted.");
+    expect(statusCode).to.equal(302);
 
     // Eliminar el usuario de la base de datos:
-    const uid = String(registerBody.user.id);
+    const user = await UserService.findUser(userBody.email);
+
+    const uid = String(user.id);
 
     await UserService.deleteUser(uid);
   });
@@ -229,11 +225,11 @@ describe("Functional test - Should test Session endpoints", () => {
     };
 
     // Crear un usuario
-    const { statusCode: registerCode, _body: registerBody } = await requester
+    const { statusCode: registerCode } = await requester
       .post(`${SESSION_ROUTES}/register`)
       .send(userBody);
 
-    expect(registerCode).to.equal(200);
+    expect(registerCode).to.equal(302);
 
     // Regenerar contraseña:
     const newPasswordBody = {
@@ -241,7 +237,7 @@ describe("Functional test - Should test Session endpoints", () => {
       password: userBody.password,
     };
 
-    const { statusCode, ok, _body } = await requester
+    const { statusCode, _body } = await requester
       .post(`${SESSION_ROUTES}/reset`)
       .send(newPasswordBody);
 
@@ -252,7 +248,9 @@ describe("Functional test - Should test Session endpoints", () => {
     );
 
     // Eliminar el usuario de la base de datos:
-    const uid = String(registerBody.user.id);
+    const user = await UserService.findUser(userBody.email);
+
+    const uid = String(user.id);
 
     await UserService.deleteUser(uid);
   });
@@ -263,13 +261,11 @@ describe("Functional test - Should test Session endpoints", () => {
       password: "1234567aA$",
     };
 
-    const { statusCode, _body } = await requester
+    const { statusCode } = await requester
       .post(`${SESSION_ROUTES}/reset`)
       .send(userBody);
 
-    expect(statusCode).to.equal(404);
-    expect(_body).to.have.property("message");
-    expect(_body.message).to.equal("Error - User not found.");
+    expect(statusCode).to.equal(302);
   });
 
   it("Should test POST /api/v1/sessions/reset - return Error 400 - Invalid password", async () => {
@@ -284,6 +280,9 @@ describe("Functional test - Should test Session endpoints", () => {
 
     expect(statusCode).to.equal(400);
     expect(_body).to.have.property("message");
+    expect(_body.message).to.equal(
+      "Error - Password must be at least 8 characters long."
+    );
   });
 
   it("Should test GET /api/v1/sessions/logout - Return Error 401 - No user session found", async () => {
@@ -292,9 +291,11 @@ describe("Functional test - Should test Session endpoints", () => {
     );
 
     expect(statusCode).to.equal(401);
+    expect(_body).to.have.property("error");
+    expect(_body.error).to.equal("Error: No auth token");
   });
 
-  it("Should test GET /api/v1/sessions/logout - Successfully log out of user session with code 200.", async () => {
+  it("Should test GET /api/v1/sessions/logout - Successfully log out of user session with code 302.", async () => {
     const userBody = {
       first_name: "Juan",
       last_name: "Perez",
@@ -308,7 +309,7 @@ describe("Functional test - Should test Session endpoints", () => {
       .post(`${SESSION_ROUTES}/register`)
       .send(userBody);
 
-    expect(registerCode).to.equal(200);
+    expect(registerCode).to.equal(302);
 
     // Iniciar sesión:
     const res = await requester
@@ -325,9 +326,7 @@ describe("Functional test - Should test Session endpoints", () => {
       .get(`${SESSION_ROUTES}/logout`)
       .set("Cookie", authToken);
 
-    expect(statusCode).to.equal(200);
-    expect(_body).to.have.property("message");
-    expect(_body.message).to.equal("User successfully logged out.");
+    expect(statusCode).to.equal(302);
 
     // Eliminar el usuario y su carrito de la base de datos:
     const user = await UserService.findUser(userBody.email);
@@ -363,7 +362,7 @@ describe("Functional test - Should test Session endpoints", () => {
       .post(`${SESSION_ROUTES}/register`)
       .send(userBody);
 
-    expect(registerCode).to.equal(200);
+    expect(registerCode).to.equal(302);
 
     // Iniciar sesión:
     const res = await requester
@@ -375,7 +374,7 @@ describe("Functional test - Should test Session endpoints", () => {
     };
     authToken = res.headers["set-cookie"][0];
 
-    const { statusCode, ok, _body } = await requester
+    const { statusCode, _body } = await requester
       .get(`${SESSION_ROUTES}/current`)
       .set("Cookie", authToken);
 
@@ -393,7 +392,7 @@ describe("Functional test - Should test Session endpoints", () => {
   });
 
   it("Should test GET /api/v1/sessions/current - Return Error 401 - No auth token.", async () => {
-    const { statusCode, ok, _body } = await requester.get(
+    const { statusCode, _body } = await requester.get(
       `${SESSION_ROUTES}/current`
     );
 

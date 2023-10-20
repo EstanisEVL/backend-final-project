@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { EMAIL, EMAIL_PASSWORD } from "../config/config.js";
+import { EMAIL, EMAIL_PASSWORD, RESET_URL } from "../config/config.js";
 import { generateMailToken } from "../utils/jwt.js";
 
 export const sendMail = async (email, amount, date) => {
@@ -47,7 +47,7 @@ export const sendRecoveryMail = async (user) => {
   });
   try {
     const token = generateMailToken(user.email);
-    const link = `http://localhost:8080/reset/${token}`;
+    const link = `${RESET_URL}/reset/${token}`;
     let result = await transporter.sendMail({
       from: EMAIL,
       to: user.email,

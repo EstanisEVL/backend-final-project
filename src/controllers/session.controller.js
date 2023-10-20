@@ -35,15 +35,11 @@ export const registerUser = async (req, res) => {
       const newUser = await UserService.createUser(userInfo);
       const user = new UserDTO(newUser);
 
-      return (
-        res
-          .status(200)
-          // Redireccionar al login:
-          .json({ message: "New user successfully registered.", user })
-      );
+      return res.status(201).redirect("/login");
     }
   } catch (err) {
     req.logger.error(err);
+
     return res.status(500).json({
       message: "Server side error - in registerUser - session.controller.js",
     });
@@ -57,17 +53,13 @@ export const recoverPassword = async (req, res) => {
     const checkUser = await UserService.findUser(email);
 
     if (!checkUser) {
-      return (
-        res
-          .status(404)
-          // Redireccionar al register
-          .json({ message: "Error - User not found." })
-      );
+      return res.status(404).redirect("/register");
     } else {
       sendRecoveryMail(checkUser);
 
-      return res.status(200).json({
-        message: `Email successfully sent to ${email}. Please check your inbox to continue the recovery process.`,
+      return res.status(200).render("success", {
+        style: "styles.css",
+        email: email,
       });
     }
   } catch (err) {
@@ -87,23 +79,13 @@ export const resetPassword = async (req, res) => {
     const checkUser = await UserService.findUser(email);
 
     if (!checkUser) {
-      return (
-        res
-          .status(404)
-          // Redirigir a register
-          .json({ message: "Error - User not found." })
-      );
+      return res.status(404).redirect("/register");
     } else {
       const isValidComparePwd = isValidPwd(password, checkUser.password);
 
       if (!isValidComparePwd) {
         const updatedUser = await UserService.updateUser(email, hashedPwd);
-        return (
-          res
-            .status(200)
-            // Redirigir al login
-            .json({ message: "User password successfully resetted." })
-        );
+        return res.status(200).redirect("/login");
       } else {
         return res.status(400).json({
           message: "Error - Password cannot be the same as the existing one.",
@@ -134,22 +116,12 @@ export const userLogin = async (req, res) => {
       const checkUser = await UserService.findUser(email);
 
       if (!checkUser) {
-        return (
-          res
-            .status(404)
-            // redirige a /register
-            .json({ message: "Error - User not found." })
-        );
+        return res.status(404).redirect("/register");
       } else {
         const isValidComparePwd = isValidPwd(password, checkUser.password);
 
         if (!isValidComparePwd) {
-          return (
-            res
-              .status(401)
-              // redirige a register
-              .json({ message: "Error - Invalid password." })
-          );
+          return res.status(401).redirect("/register");
         } else {
           if (checkUser.carts.length === 0) {
             const newCart = new CartDTO();
@@ -188,16 +160,15 @@ export const userLogin = async (req, res) => {
                 maxAge: 60 * 60 * 1000,
                 httpOnly: true,
               })
-              .json({ message: "User successfully logged in.", user });
-            // .render("profile", {
-            //   style: "styles.css",
-            //   first_name: user.fullName,
-            //   age: user.age,
-            //   email: user.email,
-            //   role: user.role,
-            //   carts: user.userCarts,
-            //   products: productsRender,
-            // });
+              .render("profile", {
+                style: "styles.css",
+                first_name: user.fullName,
+                age: user.age,
+                email: user.email,
+                role: user.role,
+                carts: user.userCarts,
+                products: productsRender,
+              });
           } else {
             const userCart = checkUser.carts.map((cart) => {
               return String(cart._id);
@@ -249,22 +220,21 @@ export const userLogin = async (req, res) => {
                 maxAge: 60 * 60 * 1000,
                 httpOnly: true,
               })
-              .json({ message: "User successfully logged in.", user });
-            // .render("profile", {
-            //   style: "styles.css",
-            //   first_name: user.fullName,
-            //   age: user.age,
-            //   email: user.email,
-            //   role: user.role,
-            //   cid: String(cart._id),
-            //   carts: user.userCarts,
-            //   productsTitle:
-            //     productsInCart.length === 0 || !user.userCarts
-            //       ? "El carrito está vacío"
-            //       : "Productos en el carrito:",
-            //   productsInCart: productsInCart,
-            //   products: productsRender,
-            // });
+              .render("profile", {
+                style: "styles.css",
+                first_name: user.name,
+                age: user.age,
+                email: user.email,
+                role: user.role,
+                cid: String(cart._id),
+                carts: user.userCarts,
+                productsTitle:
+                  productsInCart.length === 0 || !user.userCarts
+                    ? "El carrito está vacío"
+                    : "Productos en el carrito:",
+                productsInCart: productsInCart,
+                products: productsRender,
+              });
           }
         }
       }
@@ -272,21 +242,20 @@ export const userLogin = async (req, res) => {
       const adminDTO = new AdminDTO(admin);
       const token = await generateJwt({ ...adminDTO });
 
-      const docs = await ProductService.getAllProducts();
-      const productsRender = docs.map((prod) => new ProductDTO(prod));
+      const users = await UserService.getUsers();
+      const usersRender = users.map((user) => new UserDTO(user));
 
       return res
         .status(200)
         .cookie("Cookie", token, { maxAge: 60 * 60 * 1000, httpOnly: true })
-        .json({ message: "Admin successfully logged in.", admin: adminDTO });
-      // .render("admin", {
-      //   style: "styles.css",
-      //   first_name: adminDTO.fullName,
-      //   age: adminDTO.age,
-      //   email: adminDTO.email,
-      //   role: adminDTO.role,
-      //   products: productsRender,
-      // });
+        .render("admin", {
+          style: "styles.css",
+          first_name: adminDTO.fullName,
+          age: adminDTO.age,
+          email: adminDTO.email,
+          role: adminDTO.role,
+          users: usersRender,
+        });
     }
   } catch (err) {
     req.logger.error(err);
@@ -299,12 +268,7 @@ export const userLogin = async (req, res) => {
 export const userLogout = async (req, res) => {
   try {
     res.clearCookie("Cookie");
-    return (
-      res
-        .status(200)
-        // Redirigir al login
-        .json({ message: "User successfully logged out." })
-    );
+    return res.status(200).redirect("/login");
   } catch (err) {
     req.logger.error(err);
     return res.status(500).json({
@@ -347,6 +311,10 @@ export const getGithubUser = async (req, res) => {
       const cart = await CartService.createCart(newCart);
       const createdCart = await CartService.getCartById(String(cart._id));
       githubUser.carts.push(createdCart);
+
+      const lastConnection = new Date();
+      githubUser.last_connection = lastConnection;
+
       await githubUser.save();
 
       const signUser = {
@@ -357,6 +325,8 @@ export const getGithubUser = async (req, res) => {
         role: githubUser.role,
         id: String(githubUser._id),
         carts: createdCart,
+        documents: githubUser.documents,
+        last_connection: githubUser.last_connection,
       };
 
       const token = await generateJwt({ ...signUser });
@@ -374,6 +344,11 @@ export const getGithubUser = async (req, res) => {
       const cart = githubUser.carts.map((cart) => String(cart._id));
       const findCart = await CartService.getCartById(String(cart));
 
+      const lastConnection = new Date();
+      githubUser.last_connection = lastConnection;
+
+      await githubUser.save();
+
       const signUser = {
         first_name: githubUser.first_name,
         last_name: githubUser.last_name,
@@ -382,6 +357,8 @@ export const getGithubUser = async (req, res) => {
         role: githubUser.role,
         id: String(githubUser._id),
         carts: findCart,
+        documents: githubUser.documents,
+        last_connection: githubUser.last_connection,
       };
 
       const token = await generateJwt({ ...signUser });

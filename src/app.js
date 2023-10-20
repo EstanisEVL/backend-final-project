@@ -4,6 +4,7 @@ import passport from "passport";
 import displayRoutes from "express-routemap";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import handlebars from "express-handlebars";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 
@@ -19,6 +20,7 @@ import cartRoutes from "./routes/cart.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import sessionRoutes from "./routes/session.routes.js";
+import viewRoutes from "./routes/view.routes.js";
 
 // DEFINICIÓN DE VARIABLES GLOBALES
 const app = express();
@@ -38,6 +40,9 @@ app.use(
 app.use(setLogger);
 
 // HANDLEBARS
+app.engine("handlebars", handlebars.engine());
+app.set("views", `${__dirname}/views`);
+app.set("view engine", "handlebars");
 
 // PASSPORT
 initializePassport();
@@ -48,6 +53,7 @@ const specs = swaggerJSDoc(swaggerOptions);
 
 // CREACIÓN DE RUTAS
 app.use(`/api/${API_VERSION}/docs`, swaggerUi.serve, swaggerUi.setup(specs, {explorer: true}));
+app.use(`/`, viewRoutes);
 app.use(`/api/${API_VERSION}/carts`, cartRoutes);
 app.use(`/api/${API_VERSION}/products`, productRoutes);
 app.use(`/api/${API_VERSION}/users`, userRoutes);

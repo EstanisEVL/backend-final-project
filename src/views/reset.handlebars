@@ -1,0 +1,52 @@
+<main>
+  <section>
+    <div class="row">
+      <div class="column">
+        <div class="h1-margin">
+          <h1 class="h1">BLKY Pets</h1>
+        </div>
+        <div>
+          <h3 class="h3">Accesorios para mascotas.</h3>
+        </div>
+      </div>
+
+      <div class="column box dark">
+        <div class="row">
+          <h2 class="h2">Crea tu nueva contraseña</h2>
+        </div>
+
+        <div>
+          <form action="/api/v1/sessions/reset" method="post">
+            <div class="column">
+              <label class="label" for="email">Correo electrónico:</label>
+              <input
+                class="input"
+                type="email"
+                name="email"
+                id="email"
+                placeholder="Ingresa tu correo electrónico"
+                required
+              />
+            </div>
+
+            <div class="column">
+              <label class="label" for="password">Nueva contraseña:</label>
+              <input
+                class="input"
+                type="password"
+                name="password"
+                id="password"
+                placeholder="Ingresa tu contraseña"
+                required
+              />
+            </div>
+            <div class="row btn-container">
+              <button class="btn btn-submit" type="submit">Guardar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </section>
+</main>

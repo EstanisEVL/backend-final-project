@@ -1,0 +1,94 @@
+<main>
+  <section class="registry-section">
+    <div class="row">
+      <div class="column">
+        <div class="h1-margin">
+          <h1 class="h1">BLKY Pets</h1>
+        </div>
+        <div>
+          <h3 class="h3">Accesorios para mascotas.</h3>
+        </div>
+      </div>
+
+      <div class="column box registry-box dark">
+        <div class="row">
+          <h2 class="h2">Registro</h2>
+        </div>
+
+        <div>
+          <form action="/api/v1/sessions/register" method="post">
+            <div class="column">
+              <label for="first_name" class="label">Nombre:</label>
+              <input
+                class="input"
+                type="text"
+                name="first_name"
+                id="first_name"
+                placeholder="Ingresa tu nombre"
+                required
+              />
+            </div>
+
+            <div class="column">
+              <label class="label" for="last_name">Apellido:</label>
+              <input
+                class="input"
+                type="text"
+                name="last_name"
+                id="last_name"
+                placeholder="Ingresa tu apellido"
+                required
+              />
+            </div>
+
+            <div class="column">
+              <label class="label" for="email">Correo electrónico:</label>
+              <input
+                class="input"
+                type="email"
+                name="email"
+                id="email"
+                placeholder="Ingresa tu correo electrónico"
+                required
+              />
+            </div>
+
+            <div class="column">
+              <label class="label" for="age">Edad:</label>
+              <input
+                class="input"
+                type="number"
+                name="age"
+                id="age"
+                placeholder="Ingresa tu edad"
+                min="0"
+                required
+              />
+            </div>
+
+            <div class="column">
+              <label class="label" for="password">Contraseña:</label>
+              <input
+                class="input"
+                type="password"
+                name="password"
+                id="password"
+                placeholder="Ingresa tu contraseña"
+                required
+              />
+            </div>
+
+            <div class="row btn-container">
+              <button class="btn btn-submit" type="submit">Enviar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="row box-padding">
+      <p class="p">¿Ya tienes usuario? Haz
+        <a href="/login">click aquí</a>
+        para iniciar sesión.</p>
+    </div>
+  </section>
+</main>
