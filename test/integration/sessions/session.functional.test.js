@@ -86,8 +86,6 @@ describe("Functional test - Should test Session endpoints", () => {
     // Crear un usuario
     const {
       statusCode: registerCode,
-      ok: registerOk,
-      _body: registerBody,
     } = await requester.post(`${SESSION_ROUTES}/register`).send(userBody);
 
     expect(registerCode).to.equal(302);
@@ -322,7 +320,7 @@ describe("Functional test - Should test Session endpoints", () => {
     authToken = res.headers["set-cookie"][0];
 
     // Cerrar sesión:
-    const { statusCode, _body } = await requester
+    const { statusCode } = await requester
       .get(`${SESSION_ROUTES}/logout`)
       .set("Cookie", authToken);
 

@@ -10,7 +10,7 @@ export default class Tickets {
     }
   };
 
-  // For tests only:
+  // Only for tests:
   delete = async (tid) => {
     try {
       const ticket = await ticketModel.deleteOne({ _id: tid });

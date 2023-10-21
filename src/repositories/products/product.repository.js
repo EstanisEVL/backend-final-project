@@ -14,8 +14,6 @@ export default class ProductRepository {
     }
   };
 
-  // IDEA: UNIR MÉTODOS GETPRODUCTBYCODE Y BYID EN UNO SOLO:
-  // SI NO FUNCIONA, SEPARAR
   getProduct = async (code = null, pid = null) => {
     if (code !== null) {
       try {

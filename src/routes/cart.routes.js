@@ -16,7 +16,6 @@ import { roles } from "../constants/roles.js";
 
 const router = Router();
 
-// REVISAR EL MIDDLEWARE Y LOS roles:
 router.get("/", [handlePolicies([roles[0]])], getCarts);
 
 router.get("/:cid", [isValidMongoId("cid")], getCartById);

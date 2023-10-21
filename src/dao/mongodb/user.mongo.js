@@ -71,7 +71,7 @@ export default class Users {
     }
   };
 
-  // For tests only:
+  // Only for tests:
   delete = async (userId) => {
     try {
       const deletedUser = await userModel.deleteOne({
