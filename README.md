@@ -19,7 +19,7 @@
 
 - **errors**
 
-└─── errors.log     # Error log file. (This file logs errors.)
+└─── errors.log     # Error log file.
 
 - **src**
 
