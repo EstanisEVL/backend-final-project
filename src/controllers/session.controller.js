@@ -401,6 +401,7 @@ export const getGithubUser = async (req, res) => {
         .redirect(`/profile?user=${user.email}`);
     }
   } catch (err) {
+    console.error(err);
     req.logger.error(err);
     return res.status(500).json({
       message: "Server side error - in getGithubUser - session.controller.js",

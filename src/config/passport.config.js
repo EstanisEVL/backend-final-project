@@ -5,7 +5,6 @@ import {
   SECRET_JWT,
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
-  PORT,
   GITHUB_CALLBACK_URL,
 } from "./config.js";
 import { cookieExtractor } from "../utils/jwt.js";
@@ -44,7 +43,7 @@ const initializePassport = () => {
       async (accesToken, refreshToken, profile, done) => {
         try {
           const user = await UserService.findUser(profile._json.email);
-
+          console.log(user);
           if (!user) {
             let addNewUser = {
               first_name: profile._json.login,
