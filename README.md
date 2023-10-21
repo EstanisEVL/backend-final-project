@@ -16,7 +16,9 @@
 ---
 
 ### Project structure:
+
 - **errors**
+
 └─── errors.log     # Error log file. (This file logs errors.)
 
 - **src**
@@ -287,7 +289,7 @@ PRODUCT_ROUTES
 
 ### How to run the app:
 
-You can visit the live version of the app here: [link](https://backend-final-project-production.up.railway.app).
+You can visit the live version of the app here: [BLKY Pets API](https://backend-final-project-production.up.railway.app).
 
 Alternatively: feel free to fork the repo and once the .env files are correctly configured, you can run the app in any of its environments. Just execute the command `npm run start:<env>`. Environment options can be `dev`, `qa` or `prod`. Remember to install node_modules folder with `npm install`.
 
