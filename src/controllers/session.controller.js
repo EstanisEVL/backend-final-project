@@ -151,8 +151,24 @@ export const userLogin = async (req, res) => {
             req.user = { ...signUser };
             const user = new UserDTO(req.user);
 
+            let productsInCart = [];
+
+            if (user.userCarts.products.length > 0) {
+              const updatedProductsInCart = user.userCarts.products.map(
+                (prod) =>
+                  new ProductDTO(prod.product, user.userCarts._id.toHexString())
+              );
+
+              productsInCart = updatedProductsInCart;
+            }
+
             const docs = await ProductService.getAllProducts();
-            const productsRender = docs.map((prod) => new ProductDTO(prod));
+            const filteredDocs = docs.filter((prod) => prod.owner !== user.id);
+            const productsRender = filteredDocs.map(
+              (prod) => new ProductDTO(prod, user.userCarts._id.toHexString())
+            );
+            let totalProductsQuantity = user.userCarts.products.reduce((total, prod) => total + prod.quantity, 0);
+            let totalProductsPrice = user.userCarts.products.reduce((total, prod) => total + prod.quantity * prod.product.price , 0);
 
             return res
               .status(200)
@@ -162,12 +178,20 @@ export const userLogin = async (req, res) => {
               })
               .render("profile", {
                 style: "styles.css",
-                first_name: user.fullName,
+                first_name: user.name,
                 age: user.age,
                 email: user.email,
                 role: user.role,
+                cid: String(createdCart._id),
                 carts: user.userCarts,
+                productsTitle:
+                  productsInCart.length === 0 || !user.userCarts
+                    ? "El carrito está vacío"
+                    : "Productos en el carrito:",
+                productsInCart: productsInCart,
                 products: productsRender,
+                totalProducts: totalProductsQuantity,
+                fullPrice: totalProductsPrice,
               });
           } else {
             const userCart = checkUser.carts.map((cart) => {
@@ -194,7 +218,6 @@ export const userLogin = async (req, res) => {
             };
             const token = await generateJwt({ ...signUser });
             req.user = { ...signUser };
-
             const user = new UserDTO(req.user);
 
             let productsInCart = [];
@@ -213,6 +236,8 @@ export const userLogin = async (req, res) => {
             const productsRender = filteredDocs.map(
               (prod) => new ProductDTO(prod, user.userCarts._id.toHexString())
             );
+            let totalProductsQuantity = user.userCarts.products.reduce((total, prod) => total + prod.quantity, 0);
+            let totalProductsPrice = user.userCarts.products.reduce((total, prod) => total + prod.quantity * prod.product.price , 0);
 
             return res
               .status(200)
@@ -234,6 +259,8 @@ export const userLogin = async (req, res) => {
                     : "Productos en el carrito:",
                 productsInCart: productsInCart,
                 products: productsRender,
+                totalProducts: totalProductsQuantity,
+                fullPrice: totalProductsPrice,
               });
           }
         }

@@ -165,6 +165,7 @@ section {
 
 .registry-box {
   min-width: 35%;
+  max-width: 50%;
 }
 
 .box-margin {
@@ -173,6 +174,12 @@ section {
 
 .box-padding {
   padding: 2.5rem 0;
+}
+
+.password-p {
+  color: #646464;
+  text-align: left;
+  padding: 1rem 0;
 }
 
 .box-padding-recover {
