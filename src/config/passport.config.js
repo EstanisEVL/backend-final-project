@@ -6,6 +6,7 @@ import {
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
   PORT,
+  GITHUB_CALLBACK_URL,
 } from "./config.js";
 import { cookieExtractor } from "../utils/jwt.js";
 import { UserService } from "../repositories/index.js";
@@ -38,7 +39,7 @@ const initializePassport = () => {
       {
         clientID: GITHUB_CLIENT_ID,
         clientSecret: GITHUB_CLIENT_SECRET,
-        callbackURL: `http://localhost:${PORT}/api/v1/sessions/githubcallback`,
+        callbackURL: GITHUB_CALLBACK_URL,
       },
       async (accesToken, refreshToken, profile, done) => {
         try {
